@@ -98,8 +98,10 @@ def handle_message(event):
             line_bot_api.reply_message(REPLY_TOKEN , text) #ส่งข้อความ response data
     
     elif user_session == "ใส่หมายเลข": #check session
-        r = requests.get('https://kerryapi.herokuapp.com/api/kerry/?tracking_number={}'.format(MESSAGE_FROM_USER)).json()
+        tracking_num = MESSAGE_FROM_USER
+        r = requests.get('https://kerryapi.herokuapp.com/api/kerry/?tracking_number='+str(tracking_num)).json()
         #create json dict flex message from r
+        print(r)
         #กรณีที่ไม่เจอพัสดุ
         if isinstance(r,str):
             text = TextSendMessage("ไม่พบหมายเลขพัสดุ กรุณาใส่เลขใหม่อีกครั้งคะ")
@@ -118,4 +120,4 @@ def handle_message(event):
                 line_bot_api.reply_message(REPLY_TOKEN , messages=[tracking_bubble_message,text2]) #ส่งข้อความ response data
 
 if __name__ == "__main__":
-    app.run(port=8000,debug=True)
+    app.run(port=8080,debug=True)
