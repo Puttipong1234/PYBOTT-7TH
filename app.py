@@ -6,13 +6,13 @@ from linebot import (
 from linebot.exceptions import (
     InvalidSignatureError
 )
-from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
-)
+from linebot.models import *
 
 import requests
 from firebase import firebase
 from datetime import datetime
+from test_fuzzy import match_tracking_menu
+from Flexmessage.TrackingMessage import create_message
 
 app = Flask(__name__)
 from config import channel_access_token , channel_secret , DATABASE_URL
@@ -64,11 +64,29 @@ def handle_message(event):
         line_bot_api.reply_message(REPLY_TOKEN , text) #ส่งข้อความ response data
     
     if user_session == "none": #check session
-        if MESSAGE_FROM_USER == "บริการตรวจสอบพัสดุ": # validate input
+        if match_tracking_menu(TEXT_FROM_USER=MESSAGE_FROM_USER): # validate input
             # update database
             data = {"session" : "บริการตรวจสอบพัสดุ"}
             res = firebase.patch(UID+"/",data)
             text = TextSendMessage("ท่านได้เข้าสู่บริการตรวจสอบหมายเลขพัสดุ กรุณาเลือกผู้จัดส่งคะ \n\n THAIPOST(1) KERRY(2) DHL(3)")
+            line_bot_api.reply_message(REPLY_TOKEN , text) #ส่งข้อความ response data
+        
+        else :
+            qbtn = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="บริการตรวจสอบพัสดุ"
+                                        ,text="บริการตรวจสอบพัสดุ")
+                                    )
+            
+            qbtn2 = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="รองรับเจ้าไหนบ้าง?"
+                                        ,text="รองรับเจ้าไหนบ้าง?")
+                                    )
+            
+            qreply = QuickReply(items=[qbtn,qbtn2])
+            
+            text = TextSendMessage("ไม่มีบริการดังกล่าวค่ะ กรุณาเลือกใช้บริการที่เรามีดังนี้นะคะ",quick_reply=qreply)
             line_bot_api.reply_message(REPLY_TOKEN , text) #ส่งข้อความ response data
     
     elif user_session == "บริการตรวจสอบพัสดุ": #check session
@@ -81,7 +99,7 @@ def handle_message(event):
     
     elif user_session == "ใส่หมายเลข": #check session
         r = requests.get('https://kerryapi.herokuapp.com/api/kerry/?tracking_number={}'.format(MESSAGE_FROM_USER)).json()
-        
+        #create json dict flex message from r
         #กรณีที่ไม่เจอพัสดุ
         if isinstance(r,str):
             text = TextSendMessage("ไม่พบหมายเลขพัสดุ กรุณาใส่เลขใหม่อีกครั้งคะ")
@@ -90,12 +108,14 @@ def handle_message(event):
         #กรณีที่เจอพัสดุ
         else :
             result = firebase.get("{}/{}/{}".format(UID,DATABASE_NAME,MESSAGE_FROM_USER),None)
+            flex_message = create_message(requests_data=r,tracking_number=MESSAGE_FROM_USER) #สร้าง dict ที่ถูกแทนที่ด้วย data จากการ request api
+            tracking_bubble_message = Base.get_or_new_from_json_dict(flex_message,FlexSendMessage) #เปลี่ยน dict ให้กลายเป็น message Object
             if not result:
                 data = {"การค้นหาล่าสุด" : str(datetime.now())}
                 res = firebase.patch(UID+"/"+DATABASE_NAME+"/"+MESSAGE_FROM_USER,data)
-                text1 = TextSendMessage(str(r))
+                # text1 = TextSendMessage(str(r))
                 text2 = TextSendMessage("กรุณากดปุ่ม หรือ พิมพ์ 'ออกจากคำสั่ง' เพื่อออกจากการค้นหา")
-                line_bot_api.reply_message(REPLY_TOKEN , messages=[text1,text2]) #ส่งข้อความ response data
+                line_bot_api.reply_message(REPLY_TOKEN , messages=[tracking_bubble_message,text2]) #ส่งข้อความ response data
 
 if __name__ == "__main__":
     app.run(port=8000,debug=True)
