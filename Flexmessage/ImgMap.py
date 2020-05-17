@@ -80,7 +80,7 @@ def Create_ImgMap_AllProvider():
         "width": 1008,
         "height": 836
       },
-      "text": "https://www.facebook.com/Pybott/"
+      "linkUri": "https://www.facebook.com/Pybott/"
     }
   ]
 }
