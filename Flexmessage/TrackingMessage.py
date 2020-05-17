@@ -308,7 +308,7 @@ def create_message(requests_data,tracking_number):
               "contents": [
                 {
                   "type": "image",
-                  "url": "https://firebasestorage.googleapis.com/v0/b/pybott-6th.appspot.com/o/PYBOTT COVID-19 SELF TRACKER (2).png?alt=media&token=2ae72bb4-4421-4191-859c-263df6bad3b2",
+                  "url": "https://firebasestorage.googleapis.com/v0/b/pybott-6th.appspot.com/o/PYBOTT%20COVID-19%20SELF%20TRACKER%20(2).png?alt=media&token=2ae72bb4-4421-4191-859c-263df6bad3b2",
                   "margin": "md",
                   "align": "center",
                   "gravity": "center",
@@ -371,11 +371,11 @@ def create_message(requests_data,tracking_number):
                    date=each["date"],
                    time=each["time"])
         
-        sample_flex["content"]["body"]["contents"].append(row[0]) #seperator
-        sample_flex["content"]["body"]["contents"].append(row[1]) #box with content
+        sample_flex["contents"]["body"]["contents"].append(row[0]) #seperator
+        sample_flex["contents"]["body"]["contents"].append(row[1]) #box with content
     
     
-    sample_flex["content"]["body"]["contents"].append(end_spacer)
+    sample_flex["contents"]["body"]["contents"].append(end_spacer)
     
     return sample_flex
     
