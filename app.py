@@ -170,7 +170,7 @@ def handle_message(event):
             line_bot_api.reply_message(REPLY_TOKEN , text) #ส่งข้อความ response data
     
     elif user_session == "บริการตรวจสอบพัสดุ": #check session
-        if MESSAGE_FROM_USER in ["1","2","3"]:
+        if MESSAGE_FROM_USER in ["2"]:
             # update database
             data = {"session" : "ใส่หมายเลข"}
             res = firebase.patch(UID+"/",data)
@@ -184,6 +184,18 @@ def handle_message(event):
             qreply = QuickReply(items=[qbtn])
             
             text = TextSendMessage("กรุณาใส่หมายเลขพัสดุที่ต้องการตรวจสอบคะ",quick_reply=qreply)
+            line_bot_api.reply_message(REPLY_TOKEN , text) #ส่งข้อความ response data
+        
+        else :
+            qbtn = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="ออกจากคำสั่ง"
+                                        ,text="ออกจากคำสั่ง")
+                                    )
+            
+            qreply = QuickReply(items=[qbtn])
+            
+            text = TextSendMessage("Function ไม่ถูกพัฒนาเนื่องจาก แชทบอทเป็นเพียงตัวอย่าง จากการอบรม พัฒนาแชทบอทครั้งที่ 7 สนใจติดต่อเราได้ที่กลุ่ม https://www.facebook.com/groups/235472611202626/",quick_reply=qreply)
             line_bot_api.reply_message(REPLY_TOKEN , text) #ส่งข้อความ response data
     
     elif user_session == "ใส่หมายเลข": #check session
