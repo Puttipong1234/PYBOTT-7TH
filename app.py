@@ -1,4 +1,4 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort , send_from_directory
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -13,13 +13,24 @@ from firebase import firebase
 from datetime import datetime
 from test_fuzzy import match_tracking_menu
 from Flexmessage.TrackingMessage import create_message
+from Flexmessage.ImgMap import Create_ImgMap_AllProvider , Create_ImgMap_ChooseProvider
 
 app = Flask(__name__)
-from config import channel_access_token , channel_secret , DATABASE_URL
+from config import channel_access_token , channel_secret , DATABASE_URL , RICHMENU_ID
 line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
 firebase = firebase.FirebaseApplication(DATABASE_URL, None)
 DATABASE_NAME = "TRACKING_HISTORY"
+
+import os
+@app.route("/ImgMap/<picname>/1040")
+def serve_imagemap_chooseprovider(picname):
+    current_file_folder = os.path.dirname(os.path.realpath(__file__)) #get directory path ของไฟล์นี้
+    print(current_file_folder)
+    image_folder = os.path.join(current_file_folder,"Flexmessage")
+    print(image_folder)
+    return send_from_directory(image_folder,picname)
+    
 
 
 @app.route("/callback", methods=['POST'])
@@ -64,12 +75,41 @@ def handle_message(event):
         line_bot_api.reply_message(REPLY_TOKEN , text) #ส่งข้อความ response data
     
     if user_session == "none": #check session
-        if match_tracking_menu(TEXT_FROM_USER=MESSAGE_FROM_USER): # validate input
+        if match_tracking_menu(TEXT_FOR_MATCHING="บริการตรวจสอบพัสดุ",TEXT_FROM_USER=MESSAGE_FROM_USER): # validate input
             # update database
             data = {"session" : "บริการตรวจสอบพัสดุ"}
             res = firebase.patch(UID+"/",data)
-            text = TextSendMessage("ท่านได้เข้าสู่บริการตรวจสอบหมายเลขพัสดุ กรุณาเลือกผู้จัดส่งคะ \n\n THAIPOST(1) KERRY(2) DHL(3)")
-            line_bot_api.reply_message(REPLY_TOKEN , text) #ส่งข้อความ response data
+            # text = TextSendMessage("ท่านได้เข้าสู่บริการตรวจสอบหมายเลขพัสดุ กรุณาเลือกผู้จัดส่งคะ \n\n THAIPOST(1) KERRY(2) DHL(3)")
+            image_map_message = Base.get_or_new_from_json_dict(Create_ImgMap_ChooseProvider(),ImagemapSendMessage)
+            line_bot_api.reply_message(REPLY_TOKEN , image_map_message) #ส่งข้อความ response data
+        
+        if match_tracking_menu(TEXT_FOR_MATCHING="รองรับเจ้าไหนบ้าง?",TEXT_FROM_USER=MESSAGE_FROM_USER):
+            image_map_message = Base.get_or_new_from_json_dict(Create_ImgMap_AllProvider(),ImagemapSendMessage)
+            
+            qbtn = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="บริการตรวจสอบพัสดุ"
+                                        ,text="บริการตรวจสอบพัสดุ")
+                                    )
+            
+            qbtn2 = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="รองรับเจ้าไหนบ้าง?"
+                                        ,text="รองรับเจ้าไหนบ้าง?")
+                                    )
+            
+            qbtn3 = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="ประวัติการค้นหาพัสดุ"
+                                        ,text="ประวัติการค้นหาพัสดุ")
+                                    )
+            
+            qreply = QuickReply(items=[qbtn,qbtn2,qbtn3])
+            
+            text = TextSendMessage("กรุณาเลือกตำสั่ง เพื่อเริ่มต้นใช้งานได้เลยคะ",quick_reply=qreply)
+            
+            line_bot_api.reply_message(REPLY_TOKEN , messages=[image_map_message,text]) #ส่งข้อความ response data
+        
         
         else :
             qbtn = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
@@ -84,7 +124,13 @@ def handle_message(event):
                                         ,text="รองรับเจ้าไหนบ้าง?")
                                     )
             
-            qreply = QuickReply(items=[qbtn,qbtn2])
+            qbtn3 = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="ประวัติการค้นหาพัสดุ"
+                                        ,text="ประวัติการค้นหาพัสดุ")
+                                    )
+            
+            qreply = QuickReply(items=[qbtn,qbtn2,qbtn3])
             
             text = TextSendMessage("ไม่มีบริการดังกล่าวค่ะ กรุณาเลือกใช้บริการที่เรามีดังนี้นะคะ",quick_reply=qreply)
             line_bot_api.reply_message(REPLY_TOKEN , text) #ส่งข้อความ response data
@@ -116,6 +162,43 @@ def handle_message(event):
             # text1 = TextSendMessage(str(r))
             text2 = TextSendMessage("กรุณากดปุ่ม หรือ พิมพ์ 'ออกจากคำสั่ง' เพื่อออกจากการค้นหา")
             line_bot_api.reply_message(REPLY_TOKEN , messages=[tracking_bubble_message,text2]) #ส่งข้อความ response data
+
+
+@handler.add(FollowEvent)
+def Register(event):
+    REPLY_TOKEN = event.reply_token #เก็บ reply token
+    UID = event.source.user_id #เก็บ user id
+    
+    line_bot_api.link_rich_menu_to_user(user_id=UID,rich_menu_id=RICHMENU_ID)
+    
+    qbtn = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="บริการตรวจสอบพัสดุ"
+                                        ,text="บริการตรวจสอบพัสดุ")
+                                    )
+            
+    qbtn2 = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="รองรับเจ้าไหนบ้าง?"
+                                        ,text="รองรับเจ้าไหนบ้าง?")
+                                    )
+    
+    qbtn3 = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="ประวัติการค้นหาพัสดุ"
+                                        ,text="ประวัติการค้นหาพัสดุ")
+                                    )
+            
+    qreply = QuickReply(items=[qbtn,qbtn2,qbtn3])
+    
+    image_message = ImageSendMessage(original_content_url="https://en.pimg.jp/042/301/008/1/42301008.jpg",
+                                     preview_image_url="https://en.pimg.jp/042/301/008/1/42301008.jpg"
+                                     )
+    
+    text_message = TextSendMessage(text="ยินต้อนรับเข้าสู่บริการตรวจสอบสถานะพัสดุฟรี! กรุณากดปุ่ม หรือไปที่แถบช่วยเหลือ เพื่อเริ่มใช้งานคะ",quick_reply=qreply)
+    
+    line_bot_api.reply_message(reply_token=REPLY_TOKEN , messages=[image_message,text_message])
+    
 
 if __name__ == "__main__":
     app.run(port=8080,debug=True)

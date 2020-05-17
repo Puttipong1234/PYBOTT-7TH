@@ -15,8 +15,9 @@ from fuzzywuzzy import process
 # print("result2 : " + str(result2))
 # print("result3 : " + str(result3))
 
-def match_tracking_menu(TEXT_FROM_USER):
-    result = fuzz.ratio("บริการตรวจสอบพัสดุ",TEXT_FROM_USER)
+def match_tracking_menu(TEXT_FOR_MATCHING,TEXT_FROM_USER):
+    # result = fuzz.ratio("บริการตรวจสอบพัสดุ",TEXT_FROM_USER)
+    result = fuzz.ratio(TEXT_FOR_MATCHING,TEXT_FROM_USER)
     if result >= 30:
         return True
     else:
