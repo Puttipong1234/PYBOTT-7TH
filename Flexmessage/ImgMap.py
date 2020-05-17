@@ -2,7 +2,7 @@ from flask import request
 
 def Create_ImgMap_ChooseProvider():
     
-  base_url = "https://{}/ImgMap/chooseProvider".format(request.host)
+  base_url = "https://{}/ImgMap/IMGMAP01.jpg".format(request.host)
     
   imagemap_json = {
   "type": "imagemap",
@@ -51,7 +51,7 @@ def Create_ImgMap_ChooseProvider():
 
 def Create_ImgMap_AllProvider():
       
-  base_url = "https://{}/ImgMap/chooseProvider".format(request.host)
+  base_url = "https://{}/ImgMap/IMGMAP02.png".format(request.host)
   
   imagemap_json = {
   "type": "imagemap",

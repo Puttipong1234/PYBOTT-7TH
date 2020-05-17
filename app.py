@@ -83,7 +83,7 @@ def handle_message(event):
             image_map_message = Base.get_or_new_from_json_dict(Create_ImgMap_ChooseProvider(),ImagemapSendMessage)
             line_bot_api.reply_message(REPLY_TOKEN , image_map_message) #ส่งข้อความ response data
         
-        if match_tracking_menu(TEXT_FOR_MATCHING="รองรับเจ้าไหนบ้าง?",TEXT_FROM_USER=MESSAGE_FROM_USER):
+        elif match_tracking_menu(TEXT_FOR_MATCHING="รองรับเจ้าไหนบ้าง?",TEXT_FROM_USER=MESSAGE_FROM_USER):
             image_map_message = Base.get_or_new_from_json_dict(Create_ImgMap_AllProvider(),ImagemapSendMessage)
             
             qbtn = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
@@ -110,6 +110,40 @@ def handle_message(event):
             
             line_bot_api.reply_message(REPLY_TOKEN , messages=[image_map_message,text]) #ส่งข้อความ response data
         
+        elif match_tracking_menu(TEXT_FOR_MATCHING="ประวัติการค้นหา",TEXT_FROM_USER=MESSAGE_FROM_USER):
+            การค้นหาพัสดุทั้งหมด = firebase.get("/{}/TRACKING_HISTORY".format(UID),None)
+            # print(การค้นหาพัสดุทั้งหมด)
+            plain_text = "📌 ข้อมูลการค้นหาล่าสุด....\n"
+            for เลขพัสดุ,ข้อมูล in การค้นหาพัสดุทั้งหมด.items():
+                # print(เลขพัสดุ)
+                # print(ข้อมูล["สถานะล่าสุดของพัสดุ"])
+                plain_text = plain_text + "\n" + "📍" + เลขพัสดุ + "\n\tสถานะปัจจุบัน : " + ข้อมูล["สถานะล่าสุดของพัสดุ"] + "\n"
+            
+            plain_text = plain_text + "\n" + "▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️"
+            
+            qbtn = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="บริการตรวจสอบพัสดุ"
+                                        ,text="บริการตรวจสอบพัสดุ")
+                                    )
+            
+            qbtn2 = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="รองรับเจ้าไหนบ้าง?"
+                                        ,text="รองรับเจ้าไหนบ้าง?")
+                                    )
+            
+            qbtn3 = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="ประวัติการค้นหาพัสดุ"
+                                        ,text="ประวัติการค้นหาพัสดุ")
+                                    )
+            
+            qreply = QuickReply(items=[qbtn,qbtn2,qbtn3])
+            
+            text = TextSendMessage(text=plain_text,quick_reply=qreply)
+            line_bot_api.reply_message(reply_token=REPLY_TOKEN , messages=[text])
+                
         
         else :
             qbtn = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
@@ -157,7 +191,7 @@ def handle_message(event):
             # result = firebase.get("{}/{}/{}".format(UID,DATABASE_NAME,MESSAGE_FROM_USER),None)
             flex_message = create_message(requests_data=r,tracking_number=MESSAGE_FROM_USER) #สร้าง dict ที่ถูกแทนที่ด้วย data จากการ request api
             tracking_bubble_message = Base.get_or_new_from_json_dict(flex_message,FlexSendMessage) #เปลี่ยน dict ให้กลายเป็น message Object
-            data = {"การค้นหาล่าสุด" : str(datetime.now())}
+            data = {"การค้นหาล่าสุด" : str(datetime.now()),"สถานะล่าสุดของพัสดุ" : str(r["info"][0]["description"])} #เก็บข้อมูล สถานะของพัสดุ
             res = firebase.patch(UID+"/"+DATABASE_NAME+"/"+MESSAGE_FROM_USER,data)
             # text1 = TextSendMessage(str(r))
             text2 = TextSendMessage("กรุณากดปุ่ม หรือ พิมพ์ 'ออกจากคำสั่ง' เพื่อออกจากการค้นหา")
