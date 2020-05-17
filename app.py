@@ -119,7 +119,7 @@ def handle_message(event):
                 # print(ข้อมูล["สถานะล่าสุดของพัสดุ"])
                 plain_text = plain_text + "\n" + "📍" + เลขพัสดุ + "\n\tสถานะปัจจุบัน : " + ข้อมูล["สถานะล่าสุดของพัสดุ"] + "\n"
             
-            plain_text = plain_text + "\n" + "▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️"
+            plain_text = plain_text + "\n" + "▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪"
             
             qbtn = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
                                     ,action=MessageAction(
@@ -174,7 +174,16 @@ def handle_message(event):
             # update database
             data = {"session" : "ใส่หมายเลข"}
             res = firebase.patch(UID+"/",data)
-            text = TextSendMessage("กรุณาใส่หมายเลขพัสดุที่ต้องการตรวจสอบคะ")
+            
+            qbtn = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="ออกจากคำสั่ง"
+                                        ,text="ออกจากคำสั่ง")
+                                    )
+            
+            qreply = QuickReply(items=[qbtn])
+            
+            text = TextSendMessage("กรุณาใส่หมายเลขพัสดุที่ต้องการตรวจสอบคะ",quick_reply=qreply)
             line_bot_api.reply_message(REPLY_TOKEN , text) #ส่งข้อความ response data
     
     elif user_session == "ใส่หมายเลข": #check session
@@ -194,7 +203,16 @@ def handle_message(event):
             data = {"การค้นหาล่าสุด" : str(datetime.now()),"สถานะล่าสุดของพัสดุ" : str(r["info"][0]["description"])} #เก็บข้อมูล สถานะของพัสดุ
             res = firebase.patch(UID+"/"+DATABASE_NAME+"/"+MESSAGE_FROM_USER,data)
             # text1 = TextSendMessage(str(r))
-            text2 = TextSendMessage("กรุณากดปุ่ม หรือ พิมพ์ 'ออกจากคำสั่ง' เพื่อออกจากการค้นหา")
+            
+            qbtn = QuickReplyButton(image_url="https://i0.wp.com/marketeeronline.co/wp-content/uploads/2018/07/Post_Web-1.jpg?fit=816%2C455&ssl=1"
+                                    ,action=MessageAction(
+                                        label="ออกจากคำสั่ง"
+                                        ,text="ออกจากคำสั่ง")
+                                    )
+            
+            qreply = QuickReply(items=[qbtn])
+            
+            text2 = TextSendMessage("กรุณากดปุ่ม หรือ พิมพ์ 'ออกจากคำสั่ง' เพื่อออกจากการค้นหา",quick_reply=qreply)
             line_bot_api.reply_message(REPLY_TOKEN , messages=[tracking_bubble_message,text2]) #ส่งข้อความ response data
 
 

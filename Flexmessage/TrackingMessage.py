@@ -60,6 +60,25 @@ time = " 11:37"
 
 # func สำหรับการสร้าง box
 def create_row(location,description,date,time):
+    
+    color_status = "#2200fb"
+    
+    if description == "ปลายทางได้รับเรียบร้อยแล้ว":
+          color_status = "#09ff00"
+    
+    elif description == "กำลังจัดส่ง":
+          color_status = "#FFA500"
+
+    elif description == "พัสดุถึงศูนย์คัดแยก":
+          color_status = "#656464"
+    
+    elif description == "พัสดุพร้อมนำส่งให้เคอรี่ เอ็กซ์เพรส":
+          color_status = "#2200fb"
+          
+    elif description == "ไม่สามารถติดต่อเลขหมายปลายทางได้":
+          color_status = "#ff0000"
+      
+      
     sample_box = [
         { # seperator
           "type": "separator",
@@ -114,8 +133,8 @@ def create_row(location,description,date,time):
                       "align": "center",
                       "gravity": "center",
                       "weight": "bold",
-                      "color": "#02D000",
-                      "wrap": True
+                      "color": color_status,
+                      "wrap": False
                     }
                   ]
                 }
@@ -365,7 +384,7 @@ def create_message(requests_data,tracking_number):
         }
     
     print(requests_data["info"])
-    for each in requests_data["info"]:
+    for each in requests_data["info"][0:4]: #ลดเหลือแค่ 5 box เพราะ flex ยาวเกิน ถ้าจะทำเพิ่มให้ใช้ carousel ช่วย
         row = create_row(location=each["location"],
                    description=each["description"],
                    date=each["date"],
