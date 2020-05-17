@@ -110,7 +110,7 @@ def handle_message(event):
             
             line_bot_api.reply_message(REPLY_TOKEN , messages=[image_map_message,text]) #ส่งข้อความ response data
         
-        elif match_tracking_menu(TEXT_FOR_MATCHING="ประวัติการค้นหา",TEXT_FROM_USER=MESSAGE_FROM_USER):
+        elif match_tracking_menu(TEXT_FOR_MATCHING="ประวัติการค้นหาพัสดุ",TEXT_FROM_USER=MESSAGE_FROM_USER):
             การค้นหาพัสดุทั้งหมด = firebase.get("/{}/TRACKING_HISTORY".format(UID),None)
             # print(การค้นหาพัสดุทั้งหมด)
             plain_text = "📌 ข้อมูลการค้นหาล่าสุด....\n"
