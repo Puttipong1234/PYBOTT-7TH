@@ -108,7 +108,7 @@ def handle_message(event):
         
         #กรณีที่เจอพัสดุ
         else :
-            result = firebase.get("{}/{}/{}".format(UID,DATABASE_NAME,MESSAGE_FROM_USER),None)
+            # result = firebase.get("{}/{}/{}".format(UID,DATABASE_NAME,MESSAGE_FROM_USER),None)
             flex_message = create_message(requests_data=r,tracking_number=MESSAGE_FROM_USER) #สร้าง dict ที่ถูกแทนที่ด้วย data จากการ request api
             tracking_bubble_message = Base.get_or_new_from_json_dict(flex_message,FlexSendMessage) #เปลี่ยน dict ให้กลายเป็น message Object
             data = {"การค้นหาล่าสุด" : str(datetime.now())}
@@ -116,8 +116,6 @@ def handle_message(event):
             # text1 = TextSendMessage(str(r))
             text2 = TextSendMessage("กรุณากดปุ่ม หรือ พิมพ์ 'ออกจากคำสั่ง' เพื่อออกจากการค้นหา")
             line_bot_api.reply_message(REPLY_TOKEN , messages=[tracking_bubble_message,text2]) #ส่งข้อความ response data
-
-
 
 if __name__ == "__main__":
     app.run(port=8080,debug=True)
