@@ -200,8 +200,10 @@ def handle_message(event):
     
     elif user_session == "ใส่หมายเลข": #check session
         tracking_num = MESSAGE_FROM_USER
-        r = requests.get('https://kerryapi.herokuapp.com/api/kerry/?tracking_number='+str(tracking_num)).json()
-        #create json dict flex message from r
+        
+        # Use Your Backend API 
+        # r = requests.get(<Use Your Backend API>+tracking_num).json()
+
         #กรณีที่ไม่เจอพัสดุ
         if isinstance(r,str):
             text = TextSendMessage("ไม่พบหมายเลขพัสดุ กรุณาใส่เลขใหม่อีกครั้งคะ")
