@@ -92,7 +92,8 @@ def CreateRichMenu(ImageFilePath,Rich_json,channel_access_token):
 
     richId = RegisRich(Rich_json = Rich_json,channel_access_token = channel_access_token)
 
-    url = ' https://api.line.me/v2/bot/richmenu/{}/content'.format(richId)
+    url = ' https://api-data.line.me/v2/bot/richmenu/{}/content'.format(richId)
+    # https://api-data.line.me/v2/bot/richmenu/richmenu-88c05ef6921ae53f8b58a25f3a65faf7/content
 
     Authorization = 'Bearer {}'.format(channel_access_token)
 
